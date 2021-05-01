@@ -22,7 +22,7 @@ app.get('/', (req,res) => {
 // CRUD
 
 //create todo list
-app.post('/todo', async (req,res) => {
+app.post('/todos', async (req,res) => {
     try {
         const { description } = req.body
         const id = req.params
@@ -45,10 +45,10 @@ app.get("/read_todos", async(req,res) => {
     try {
         
         // this is inserting into the <table> and the (column) with a value(), [descriptipn] to set the variable decalred
-        const readTodofromDB = await pool.query("SELECT * from todo")
+        const readTodofromDB = await pool.query("SELECT * from todo ORDER by todo_id")
         
        
-        res.json(readTodofromDB)
+        res.json(readTodofromDB.rows)
         // res.status(200)
     } catch (err) {
         console.log(err.message)
@@ -62,7 +62,7 @@ app.get('/read_todos/:id', async (req,res) => {
         // this is inserting into the <table> and the (column) with a value(), [descriptipn] to set the variable decalred
         const readSingleTodoFromDB = await pool.query("SELECT *  from todo WHERE todo_id = ($1)", [id]
         );
-        console.log(req.body)
+        
         res.json(readSingleTodoFromDB)
         // res.status(200)
     } catch (err) {
@@ -72,12 +72,38 @@ app.get('/read_todos/:id', async (req,res) => {
 })
 
 //update the todo list
+app.put("/update_todos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { description } = req.body;
+  
+      const updateTodoInDB = await pool.query(
+        "UPDATE todo SET description = $1 WHERE todo_id = $2",
+        [description, id]
+      );
+  
+      res.json("Updated the todos yay!");
+    } catch (err) {
+      console.error(err.message);
+    }
 
-
+});
 
 
 //delete the todo list
 
+app.delete("/delete_todos/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleteTodoInDB = await pool.query(
+        "DELETE FROM todo WHERE todo_id = $1",
+        [id]
+      );
+      res.json("Todo was successfully deleted!");
+    } catch (err) {
+      console.log(err.message);
+    }
+  });
 
 
 app.listen(PORT, () => console.log(`running on ${PORT}`))
